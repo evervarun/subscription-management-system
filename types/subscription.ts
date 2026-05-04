@@ -1,5 +1,5 @@
 export type PaymentCycle = 'monthly' | 'quarterly' | 'annual' | 'one-time';
-export type SubscriptionStatus = 'active' | 'expired' | 'cancelled' | 'pending';
+export type SubscriptionStatus = 'active' | 'expired' | 'cancelled' | 'pending' | 'trial' | 'paused';
 
 export interface SubscriptionOwner {
   name: string;

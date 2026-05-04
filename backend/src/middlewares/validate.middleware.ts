@@ -8,7 +8,7 @@ export const createSubscriptionSchema = z.object({
   startDate: z.string().optional(),
   expiryDate: z.string().min(1, 'Expiry date is required'),
   paymentCycle: z.enum(['monthly', 'quarterly', 'annual', 'one-time']).optional(),
-  status: z.enum(['active', 'expired', 'cancelled', 'pending']).default('active'),
+  status: z.enum(['active', 'expired', 'cancelled', 'pending', 'trial', 'paused']).default('active'),
   licenses: z.number().min(0).optional(),
   departments: z.array(z.string()).default([]),
   teams: z.array(z.string()).default([]),

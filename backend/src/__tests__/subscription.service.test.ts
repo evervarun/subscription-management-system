@@ -1,5 +1,5 @@
-import { subscriptionService, AppError } from '../../services/subscription.service';
-import { Subscription } from '../../models/subscription.model';
+import { subscriptionService, AppError } from '../services/subscription.service';
+import { Subscription } from '../models/subscription.model';
 
 const baseData = {
   toolName: 'Jira',
@@ -51,12 +51,12 @@ describe('subscriptionService.getSubscriptions', () => {
 
   it('filters by status=active', async () => {
     const result = await subscriptionService.getSubscriptions({ status: 'active' });
-    expect(result.data.every(s => s.status === 'active')).toBe(true);
+    expect(result.data.every((s: { status: string }) => s.status === 'active')).toBe(true);
   });
 
   it('filters by status=expired', async () => {
     const result = await subscriptionService.getSubscriptions({ status: 'expired' });
-    expect(result.data.every(s => s.status === 'expired')).toBe(true);
+    expect(result.data.every((s: { status: string }) => s.status === 'expired')).toBe(true);
   });
 
   it('filters by department', async () => {
@@ -65,7 +65,7 @@ describe('subscriptionService.getSubscriptions', () => {
       changedBy
     );
     const result = await subscriptionService.getSubscriptions({ department: 'HR' });
-    expect(result.data.every(s => s.departments.includes('HR'))).toBe(true);
+    expect(result.data.every((s: { departments: string[] }) => s.departments.includes('HR'))).toBe(true);
   });
 
   it('supports pagination', async () => {

@@ -17,6 +17,8 @@ const PAGE_SIZE = 10;
 const STATUS_OPTIONS: { value: SubscriptionStatus | ''; label: string }[] = [
   { value: '', label: 'All Statuses' },
   { value: 'active', label: 'Active' },
+  { value: 'trial', label: 'Trial' },
+  { value: 'paused', label: 'Paused' },
   { value: 'expired', label: 'Expired' },
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'pending', label: 'Pending' },

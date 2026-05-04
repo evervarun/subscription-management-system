@@ -281,7 +281,9 @@ export default function SubscriptionDetailPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select {...register('status')} className={inputCls}>
                 <option value="active">Active</option>
+                <option value="trial">Trial</option>
                 <option value="pending">Pending</option>
+                <option value="paused">Paused</option>
                 <option value="cancelled">Cancelled</option>
                 <option value="expired">Expired</option>
               </select>

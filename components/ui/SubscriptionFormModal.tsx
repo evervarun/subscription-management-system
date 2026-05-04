@@ -165,7 +165,9 @@ export default function SubscriptionFormModal({ open, onClose, onSuccess }: Subs
                 <Label>Status</Label>
                 <select {...register('status')} className={inputCls}>
                   <option value="active">Active</option>
+                  <option value="trial">Trial</option>
                   <option value="pending">Pending</option>
+                  <option value="paused">Paused</option>
                   <option value="cancelled">Cancelled</option>
                   <option value="expired">Expired</option>
                 </select>

@@ -13,7 +13,7 @@ export interface ISubscription extends Document {
   startDate?: Date;
   expiryDate: Date;
   paymentCycle?: 'monthly' | 'quarterly' | 'annual' | 'one-time';
-  status: 'active' | 'expired' | 'cancelled' | 'pending';
+  status: 'active' | 'expired' | 'cancelled' | 'pending' | 'trial' | 'paused';
   licenses?: number;
   departments: string[];
   teams: string[];
@@ -37,7 +37,7 @@ const SubscriptionSchema = new Schema<ISubscription>(
     },
     status: {
       type: String,
-      enum: ['active', 'expired', 'cancelled', 'pending'],
+      enum: ['active', 'expired', 'cancelled', 'pending', 'trial', 'paused'],
       default: 'active',
     },
     licenses: { type: Number, min: 0 },
