@@ -262,12 +262,12 @@ export default function DashboardPage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {([
-            { status: 'active'    as SubscriptionStatus, bg: 'bg-emerald-50', border: 'border-emerald-100', dot: 'bg-emerald-500', text: 'text-emerald-700', bar: 'bg-emerald-400' },
-            { status: 'trial'     as SubscriptionStatus, bg: 'bg-indigo-50',  border: 'border-indigo-100',  dot: 'bg-indigo-500',  text: 'text-indigo-700',  bar: 'bg-indigo-400' },
-            { status: 'paused'    as SubscriptionStatus, bg: 'bg-orange-50',  border: 'border-orange-100',  dot: 'bg-orange-500',  text: 'text-orange-700',  bar: 'bg-orange-400' },
-            { status: 'pending'   as SubscriptionStatus, bg: 'bg-amber-50',   border: 'border-amber-100',   dot: 'bg-amber-500',   text: 'text-amber-700',   bar: 'bg-amber-400' },
-            { status: 'expired'   as SubscriptionStatus, bg: 'bg-red-50',     border: 'border-red-100',     dot: 'bg-red-500',     text: 'text-red-700',     bar: 'bg-red-400' },
-            { status: 'cancelled' as SubscriptionStatus, bg: 'bg-slate-50',   border: 'border-slate-200',   dot: 'bg-slate-400',   text: 'text-slate-600',   bar: 'bg-slate-300' },
+            { status: 'active' as SubscriptionStatus, bg: 'bg-emerald-50', border: 'border-emerald-100', dot: 'bg-emerald-500', text: 'text-emerald-700', bar: 'bg-emerald-400' },
+            { status: 'trial' as SubscriptionStatus, bg: 'bg-indigo-50', border: 'border-indigo-100', dot: 'bg-indigo-500', text: 'text-indigo-700', bar: 'bg-indigo-400' },
+            { status: 'paused' as SubscriptionStatus, bg: 'bg-orange-50', border: 'border-orange-100', dot: 'bg-orange-500', text: 'text-orange-700', bar: 'bg-orange-400' },
+            { status: 'pending' as SubscriptionStatus, bg: 'bg-amber-50', border: 'border-amber-100', dot: 'bg-amber-500', text: 'text-amber-700', bar: 'bg-amber-400' },
+            { status: 'expired' as SubscriptionStatus, bg: 'bg-red-50', border: 'border-red-100', dot: 'bg-red-500', text: 'text-red-700', bar: 'bg-red-400' },
+            { status: 'cancelled' as SubscriptionStatus, bg: 'bg-slate-50', border: 'border-slate-200', dot: 'bg-slate-400', text: 'text-slate-600', bar: 'bg-slate-300' },
           ]).map(({ status, bg, border, dot, text, bar }) => {
             const count = stats.allSubs.filter(s => s.status === status).length;
             const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
