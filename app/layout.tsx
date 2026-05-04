@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -19,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`} data-theme="light">
-      <body className="h-full flex bg-gray-50">
+    <html lang="en" className={`${montserrat.variable} h-full antialiased`} data-theme="light">
+      <body className="h-full flex bg-gray-50 font-[var(--font-montserrat)]">
         <Sidebar />
         <main className="flex-1 overflow-auto p-8">{children}</main>
       </body>
