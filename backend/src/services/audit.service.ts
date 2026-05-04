@@ -17,4 +17,8 @@ export const auditService = {
   async getBySubscriptionId(subscriptionId: string) {
     return auditRepository.findBySubscriptionId(subscriptionId);
   },
+
+  async getRecentByOrg(organizationId: string, limit = 20) {
+    return auditRepository.findRecentByOrg(organizationId, limit);
+  },
 };

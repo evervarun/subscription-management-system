@@ -24,12 +24,12 @@ interface Stats {
 }
 
 const STATUS_COLORS: Record<SubscriptionStatus, string> = {
-  active:    '#6366f1',
-  expired:   '#f43f5e',
+  active: '#6366f1',
+  expired: '#f43f5e',
   cancelled: '#94a3b8',
-  pending:   '#f59e0b',
-  trial:     '#3b82f6',
-  paused:    '#f97316',
+  pending: '#f59e0b',
+  trial: '#3b82f6',
+  paused: '#f97316',
 };
 
 function StatCard({ label, value, icon: Icon, color, bg, sub }: {
@@ -51,11 +51,11 @@ function StatCard({ label, value, icon: Icon, color, bg, sub }: {
 }
 
 function ToolAvatar({ name }: { name: string }) {
-  const colors = ['bg-indigo-100 text-indigo-700','bg-emerald-100 text-emerald-700','bg-amber-100 text-amber-700','bg-rose-100 text-rose-700','bg-violet-100 text-violet-700','bg-cyan-100 text-cyan-700'];
+  const colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-rose-100 text-rose-700', 'bg-violet-100 text-violet-700', 'bg-cyan-100 text-cyan-700'];
   const idx = name.charCodeAt(0) % colors.length;
   return (
     <div className={`w-8 h-8 rounded-lg ${colors[idx]} flex items-center justify-center text-xs font-bold shrink-0`}>
-      {name.slice(0,2).toUpperCase()}
+      {name.slice(0, 2).toUpperCase()}
     </div>
   );
 }
@@ -85,7 +85,7 @@ export default function DashboardPage() {
           if (!s.cost) return sum;
           const annual = s.paymentCycle === 'monthly' ? s.cost * 12
             : s.paymentCycle === 'quarterly' ? s.cost * 4
-            : s.cost;
+              : s.cost;
           return sum + annual;
         }, 0);
 
@@ -135,30 +135,41 @@ export default function DashboardPage() {
     <div>
       {/* Org banner */}
       {organization && (
-        <div className="bg-white rounded-2xl border border-slate-100 p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-4 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-            {organization.name[0]}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-slate-500 font-medium">Organization</p>
-            <p className="text-base font-bold text-slate-900 truncate">{organization.name}</p>
-          </div>
-          <div className="flex flex-wrap gap-4 text-center sm:text-right">
-            <div>
-              <p className="text-xs text-slate-400">Plan</p>
-              <p className="text-sm font-semibold text-slate-700 capitalize">{organization.planType}</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 mb-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Left: identity */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-base shrink-0 shadow-sm shadow-indigo-200">
+                {organization.name[0].toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Organization</p>
+                <p className="text-lg font-bold text-slate-900 truncate leading-tight">{organization.name}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-slate-400">Subscriptions</p>
-              <p className="text-sm font-semibold text-slate-700">{stats.total}</p>
+
+            {/* Right: stats + action */}
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Plan pill */}
+              <div className="flex flex-col items-center px-4 py-2 rounded-xl bg-indigo-50 border border-indigo-100 min-w-[72px]">
+                <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wide">Plan</p>
+                <p className="text-sm font-bold text-indigo-700 capitalize mt-0.5">{organization.planType}</p>
+              </div>
+
+              {/* Subscriptions pill */}
+              <div className="flex flex-col items-center px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 min-w-[72px]">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Subs</p>
+                <p className="text-sm font-bold text-slate-700 mt-0.5">{stats.total}</p>
+              </div>
+
+              <Link href="/subscriptions/new">
+                <Button size="sm">
+                  <Plus size={14} />
+                  Add Subscription
+                </Button>
+              </Link>
             </div>
           </div>
-          <Link href="/subscriptions/new">
-            <Button size="sm">
-              <Plus size={14} />
-              Add Subscription
-            </Button>
-          </Link>
         </div>
       )}
 
@@ -218,8 +229,8 @@ export default function DashboardPage() {
               <p className="text-sm">No subscriptions expiring soon</p>
             </div>
           ) : (
-            <ul className="space-y-3">
-              {stats.expiringSoon.slice(0, 5).map(sub => {
+            <ul className="space-y-3 overflow-y-auto max-h-[360px] pr-1">
+              {stats.expiringSoon.map(sub => {
                 const days = daysUntil(sub.expiryDate);
                 const urgency = days <= 7 ? 'bg-rose-100 text-rose-700' : days <= 14 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600';
                 return (
@@ -243,18 +254,43 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Status summary badges */}
+      {/* Status summary */}
       <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm mb-5">
-        <h3 className="text-sm font-semibold text-slate-900 mb-3">Quick Status Overview</h3>
-        <div className="flex flex-wrap gap-2">
-          {(['active','trial','paused','pending','expired','cancelled'] as SubscriptionStatus[]).map(status => {
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-slate-900">Status Breakdown</h3>
+          <Link href="/subscriptions" className="text-xs font-medium text-indigo-600 hover:text-indigo-700">View all</Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {([
+            { status: 'active'    as SubscriptionStatus, bg: 'bg-emerald-50', border: 'border-emerald-100', dot: 'bg-emerald-500', text: 'text-emerald-700', bar: 'bg-emerald-400' },
+            { status: 'trial'     as SubscriptionStatus, bg: 'bg-indigo-50',  border: 'border-indigo-100',  dot: 'bg-indigo-500',  text: 'text-indigo-700',  bar: 'bg-indigo-400' },
+            { status: 'paused'    as SubscriptionStatus, bg: 'bg-orange-50',  border: 'border-orange-100',  dot: 'bg-orange-500',  text: 'text-orange-700',  bar: 'bg-orange-400' },
+            { status: 'pending'   as SubscriptionStatus, bg: 'bg-amber-50',   border: 'border-amber-100',   dot: 'bg-amber-500',   text: 'text-amber-700',   bar: 'bg-amber-400' },
+            { status: 'expired'   as SubscriptionStatus, bg: 'bg-red-50',     border: 'border-red-100',     dot: 'bg-red-500',     text: 'text-red-700',     bar: 'bg-red-400' },
+            { status: 'cancelled' as SubscriptionStatus, bg: 'bg-slate-50',   border: 'border-slate-200',   dot: 'bg-slate-400',   text: 'text-slate-600',   bar: 'bg-slate-300' },
+          ]).map(({ status, bg, border, dot, text, bar }) => {
             const count = stats.allSubs.filter(s => s.status === status).length;
-            return count > 0 ? (
-              <Link key={status} href={`/subscriptions?status=${status}`} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
-                <StatusBadge status={status} />
-                <span className="text-xs font-semibold text-slate-700">{count}</span>
+            const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
+            return (
+              <Link
+                key={status}
+                href={`/subscriptions?status=${status}`}
+                className={`flex flex-col gap-2 p-3 rounded-xl border ${bg} ${border} hover:shadow-sm transition-all group`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${dot}`} />
+                    <span className={`text-xs font-semibold capitalize ${text}`}>{status}</span>
+                  </div>
+                  <span className={`text-base font-bold ${text}`}>{count}</span>
+                </div>
+                {/* Progress bar */}
+                <div className="h-1 w-full bg-white/70 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${bar} transition-all`} style={{ width: `${pct}%` }} />
+                </div>
+                <p className="text-[10px] text-slate-400">{pct}% of total</p>
               </Link>
-            ) : null;
+            );
           })}
         </div>
       </div>

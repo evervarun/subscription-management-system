@@ -5,7 +5,7 @@ import { connectDB } from './db';
 import { Organization } from '../models/org.model';
 import { User } from '../models/user.model';
 import { Subscription } from '../models/subscription.model';
-import { Audit } from '../models/audit.model';
+import { AuditLog as Audit } from '../models/audit.model';
 
 dotenv.config();
 
