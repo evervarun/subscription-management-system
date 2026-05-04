@@ -25,11 +25,11 @@ const STATUS_OPTIONS: { value: SubscriptionStatus | ''; label: string }[] = [
 ];
 
 function ToolAvatar({ name }: { name: string }) {
-  const colors = ['bg-indigo-100 text-indigo-700','bg-emerald-100 text-emerald-700','bg-amber-100 text-amber-700','bg-rose-100 text-rose-700','bg-violet-100 text-violet-700','bg-cyan-100 text-cyan-700'];
+  const colors = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-rose-100 text-rose-700', 'bg-violet-100 text-violet-700', 'bg-cyan-100 text-cyan-700'];
   const idx = name.charCodeAt(0) % colors.length;
   return (
     <div className={`w-8 h-8 rounded-lg ${colors[idx]} flex items-center justify-center text-xs font-bold shrink-0`}>
-      {name.slice(0,2).toUpperCase()}
+      {name.slice(0, 2).toUpperCase()}
     </div>
   );
 }

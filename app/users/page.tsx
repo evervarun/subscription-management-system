@@ -127,6 +127,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
+  const [page, setPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
@@ -135,6 +136,7 @@ export default function UsersPage() {
   async function fetchUsers() {
     try {
       setLoading(true);
+      setPage(1);
       setUsers(await userService.getAll());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load users');
@@ -185,7 +187,6 @@ export default function UsersPage() {
   const adminCount = users.filter(u => u.role === 'admin').length;
 
   const PAGE_SIZE = 10;
-  const [page, setPage] = useState(1);
   const totalPages = Math.ceil(users.length / PAGE_SIZE);
   const pagedUsers = users.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -306,12 +307,11 @@ export default function UsersPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100">
               <p className="text-sm text-slate-500">
-                Page <span className="font-semibold">{page}</span> of <span className="font-semibold">{totalPages}</span>
-                <span className="text-slate-400"> · {users.length} total</span>
+                Showing <span className="font-semibold">{(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, users.length)}</span> of <span className="font-semibold">{users.length}</span> users
               </p>
               <div className="flex gap-2">
                 <Button variant="secondary" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
-                <Button variant="secondary" size="sm" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+                <Button variant="secondary" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
               </div>
             </div>
           )}
