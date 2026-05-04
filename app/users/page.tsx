@@ -6,14 +6,42 @@ import { userService, OrgUser } from '@/services/user.service';
 import PageHeader from '@/components/layout/PageHeader';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
-import StatusBadge from '@/components/ui/StatusBadge';
+import { UserPlus, ShieldCheck, User } from 'lucide-react';
 
 function RoleBadge({ role }: { role: 'admin' | 'member' }) {
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'
-      }`}>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+      role === 'admin'
+        ? 'bg-violet-50 text-violet-700 ring-1 ring-violet-200'
+        : 'bg-slate-50 text-slate-600 ring-1 ring-slate-200'
+    }`}>
+      {role === 'admin' ? <ShieldCheck size={11} /> : <User size={11} />}
       {role}
     </span>
+  );
+}
+
+function StatusDot({ status }: { status: 'active' | 'inactive' }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${
+      status === 'active'
+        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+        : 'bg-slate-50 text-slate-500 ring-slate-200'
+    }`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+      {status}
+    </span>
+  );
+}
+
+function UserAvatar({ name }: { name: string }) {
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const colors = ['bg-indigo-100 text-indigo-700','bg-emerald-100 text-emerald-700','bg-amber-100 text-amber-700','bg-violet-100 text-violet-700','bg-cyan-100 text-cyan-700'];
+  const idx = name.charCodeAt(0) % colors.length;
+  return (
+    <div className={`w-9 h-9 rounded-full ${colors[idx]} flex items-center justify-center text-xs font-bold shrink-0`}>
+      {initials}
+    </div>
   );
 }
 
@@ -26,7 +54,6 @@ export default function UsersPage() {
   const [users, setUsers] = useState<OrgUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   const [showAddModal, setShowAddModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
@@ -72,87 +99,127 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="p-8">
+    <div>
       <PageHeader
         title="Users"
         description="Manage team members in your organization"
         action={isAdmin ? (
-          <Button onClick={() => setShowAddModal(true)}>+ Add User</Button>
+          <Button onClick={() => setShowAddModal(true)}>
+            <UserPlus size={15} />
+            Add User
+          </Button>
         ) : undefined}
       />
 
-      {error && (
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
-      )}
+      {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>}
 
       {loading ? (
-        <div className="flex justify-center py-20"><Spinner /></div>
+        <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Name', 'Email', 'Role', 'Status', 'Joined'].map(h => (
-                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/70">
+                  {['User', 'Role', 'Status', 'Joined', ...(isAdmin ? ['Actions'] : [])].map(h => (
+                    <th key={h} className={`px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide ${h === 'Actions' ? 'text-right' : 'text-left'}`}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {users.map(u => (
+                  <tr key={u._id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <UserAvatar name={u.name} />
+                        <div>
+                          <p className="font-semibold text-slate-900">{u.name}</p>
+                          <p className="text-xs text-slate-400">{u.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5"><RoleBadge role={u.role} /></td>
+                    <td className="px-5 py-3.5"><StatusDot status={u.status} /></td>
+                    <td className="px-5 py-3.5 text-slate-500 text-xs">{new Date(u.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                    {isAdmin && (
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center justify-end gap-3">
+                          <button
+                            onClick={() => toggleRole(u)}
+                            disabled={u._id === currentUser?.userId}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:underline"
+                          >
+                            Make {u.role === 'admin' ? 'Member' : 'Admin'}
+                          </button>
+                          <button
+                            onClick={() => toggleStatus(u)}
+                            disabled={u._id === currentUser?.userId}
+                            className="text-xs text-slate-500 hover:text-slate-800 font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:underline"
+                          >
+                            {u.status === 'active' ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
                 ))}
-                {isAdmin && <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {users.map(u => (
-                <tr key={u._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{u.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{u.email}</td>
-                  <td className="px-6 py-4"><RoleBadge role={u.role} /></td>
-                  <td className="px-6 py-4">
-                    <StatusBadge status={u.status === 'active' ? 'active' : 'cancelled'} />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
-                  {isAdmin && (
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <button
-                        onClick={() => toggleRole(u)}
-                        disabled={u._id === currentUser?.userId}
-                        className="text-xs text-indigo-600 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        Make {u.role === 'admin' ? 'Member' : 'Admin'}
+                {users.length === 0 && (
+                  <tr><td colSpan={isAdmin ? 5 : 4} className="px-5 py-16 text-center text-slate-400 text-sm">No users found</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {users.map(u => (
+              <div key={u._id} className="p-4">
+                <div className="flex items-center gap-3">
+                  <UserAvatar name={u.name} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 truncate">{u.name}</p>
+                    <p className="text-xs text-slate-400 truncate">{u.email}</p>
+                  </div>
+                  <RoleBadge role={u.role} />
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <StatusDot status={u.status} />
+                  {isAdmin && u._id !== currentUser?.userId && (
+                    <div className="flex gap-3">
+                      <button onClick={() => toggleRole(u)} className="text-xs text-indigo-600 font-medium hover:underline">
+                        → {u.role === 'admin' ? 'Member' : 'Admin'}
                       </button>
-                      <button
-                        onClick={() => toggleStatus(u)}
-                        disabled={u._id === currentUser?.userId}
-                        className="text-xs text-gray-500 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
+                      <button onClick={() => toggleStatus(u)} className="text-xs text-slate-500 font-medium hover:underline">
                         {u.status === 'active' ? 'Deactivate' : 'Activate'}
                       </button>
-                    </td>
+                    </div>
                   )}
-                </tr>
-              ))}
-              {users.length === 0 && (
-                <tr>
-                  <td colSpan={isAdmin ? 6 : 5} className="px-6 py-12 text-center text-gray-400 text-sm">
-                    No users found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                </div>
+              </div>
+            ))}
+            {users.length === 0 && (
+              <div className="p-8 text-center text-slate-400 text-sm">No users found</div>
+            )}
+          </div>
         </div>
       )}
 
+      {/* Add user modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => { setShowAddModal(false); setForm(emptyForm); setFormError(''); }} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Add Team Member</h2>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => { setShowAddModal(false); setForm(emptyForm); setFormError(''); }} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in slide-in-from-bottom-4 duration-200">
+            <h2 className="text-lg font-bold text-slate-900 mb-1">Add Team Member</h2>
+            <p className="text-sm text-slate-400 mb-5">Invite someone to your organization</p>
             <form onSubmit={handleAdd} className="space-y-4">
               {[
-                { label: 'Name', field: 'name', type: 'text', placeholder: 'Alice Chen' },
-                { label: 'Email', field: 'email', type: 'email', placeholder: 'alice@company.com' },
+                { label: 'Full name', field: 'name', type: 'text', placeholder: 'Alice Chen' },
+                { label: 'Work email', field: 'email', type: 'email', placeholder: 'alice@company.com' },
                 { label: 'Password', field: 'password', type: 'password', placeholder: 'Min. 8 characters' },
               ].map(({ label, field, type, placeholder }) => (
                 <div key={field}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">{label}</label>
                   <input
                     type={type}
                     required
@@ -160,33 +227,27 @@ export default function UsersPage() {
                     value={form[field as keyof typeof form]}
                     onChange={e => setForm(prev => ({ ...prev, [field]: e.target.value }))}
                     placeholder={placeholder}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 bg-slate-50 transition-all"
                   />
                 </div>
               ))}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Role</label>
                 <select
                   value={form.role}
                   onChange={e => setForm(prev => ({ ...prev, role: e.target.value as 'admin' | 'member' }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 bg-slate-50 transition-all"
                 >
                   <option value="member">Member</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              {formError && (
-                <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700">{formError}</div>
-              )}
-              <div className="flex gap-3 pt-2">
+              {formError && <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{formError}</div>}
+              <div className="flex gap-3 pt-1">
                 <Button type="submit" disabled={submitting} className="flex-1">
                   {submitting ? 'Adding…' : 'Add User'}
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => { setShowAddModal(false); setForm(emptyForm); setFormError(''); }}
-                  className="flex-1"
-                >
+                <Button variant="secondary" onClick={() => { setShowAddModal(false); setForm(emptyForm); setFormError(''); }} className="flex-1">
                   Cancel
                 </Button>
               </div>

@@ -15,7 +15,7 @@ interface SubscriptionFormModalProps {
 }
 
 const inputCls =
-  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900';
+  'w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 bg-slate-50 text-slate-900 transition-all placeholder:text-slate-400';
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -24,7 +24,7 @@ function FieldError({ message }: { message?: string }) {
 
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <label className="block text-sm font-medium text-gray-700 mb-1">
+    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
       {children}
       {required && <span className="text-red-500 ml-0.5">*</span>}
     </label>
@@ -89,19 +89,19 @@ export default function SubscriptionFormModal({ open, onClose, onSuccess }: Subs
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Add Subscription</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Register a new software subscription</p>
+            <h2 className="text-lg font-bold text-slate-900">Add Subscription</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Register a new software subscription</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
           >
             <X size={18} />
           </button>
@@ -111,7 +111,7 @@ export default function SubscriptionFormModal({ open, onClose, onSuccess }: Subs
         <div className="overflow-y-auto flex-1 px-6 py-5">
           <form id="subscription-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {serverError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
                 {serverError}
               </div>
             )}
@@ -228,7 +228,7 @@ export default function SubscriptionFormModal({ open, onClose, onSuccess }: Subs
               </div>
               <div className="flex flex-wrap gap-2">
                 {deptFields.map((field, i) => (
-                  <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+                  <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full font-medium ring-1 ring-indigo-100">
                     {String(watch(`departments.${i}` as never) ?? '')}
                     <button type="button" onClick={() => removeDept(i)} className="hover:text-red-600"><X size={12} /></button>
                   </span>
@@ -263,7 +263,7 @@ export default function SubscriptionFormModal({ open, onClose, onSuccess }: Subs
               </div>
               <div className="flex flex-wrap gap-2">
                 {teamFields.map((field, i) => (
-                  <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 text-purple-700 text-xs rounded-full">
+                  <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-50 text-violet-700 text-xs rounded-full font-medium ring-1 ring-violet-100">
                     {String(watch(`teams.${i}` as never) ?? '')}
                     <button type="button" onClick={() => removeTeam(i)} className="hover:text-red-600"><X size={12} /></button>
                   </span>
@@ -303,7 +303,7 @@ export default function SubscriptionFormModal({ open, onClose, onSuccess }: Subs
               </div>
               <div className="flex flex-wrap gap-2">
                 {reminderFields.map((field, i) => (
-                  <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                  <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 text-slate-600 text-xs rounded-full font-medium ring-1 ring-slate-200">
                     {String(watch(`renewalReminderDays.${i}` as never) ?? '')} days
                     <button type="button" onClick={() => removeReminder(i)} className="hover:text-red-600"><X size={12} /></button>
                   </span>
@@ -314,7 +314,7 @@ export default function SubscriptionFormModal({ open, onClose, onSuccess }: Subs
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 shrink-0">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>

@@ -17,6 +17,8 @@ export interface Subscription {
   paymentCycle?: PaymentCycle;
   status: SubscriptionStatus;
   licenses?: number;
+  cost?: number;
+  currency?: string;
   departments: string[];
   teams: string[];
   owner: SubscriptionOwner;
