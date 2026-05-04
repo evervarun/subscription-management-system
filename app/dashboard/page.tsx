@@ -150,12 +150,6 @@ export default function DashboardPage() {
 
             {/* Right: stats + action */}
             <div className="flex items-center gap-3 shrink-0">
-              {/* Plan pill */}
-              <div className="flex flex-col items-center px-4 py-2 rounded-xl bg-indigo-50 border border-indigo-100 min-w-[72px]">
-                <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wide">Plan</p>
-                <p className="text-sm font-bold text-indigo-700 capitalize mt-0.5">{organization.planType}</p>
-              </div>
-
               {/* Subscriptions pill */}
               <div className="flex flex-col items-center px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 min-w-[72px]">
                 <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Subs</p>
