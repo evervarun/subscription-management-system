@@ -1,6 +1,10 @@
+import mongoose from 'mongoose';
 import { ISubscription } from '../models/subscription.model';
 import { subscriptionRepository, SubscriptionFilters } from '../repositories/subscription.repository';
 import { auditService } from './audit.service';
+
+type OrgId = string | mongoose.Types.ObjectId;
+type CreateInput = Omit<Partial<ISubscription>, 'organizationId'> & { organizationId: OrgId };
 
 interface ChangedBy {
   name: string;
@@ -18,33 +22,42 @@ export class AppError extends Error {
 }
 
 export const subscriptionService = {
-  async createSubscription(data: Partial<ISubscription>, changedBy: ChangedBy = SYSTEM_USER) {
+  async createSubscription(
+    data: CreateInput,
+    changedBy: ChangedBy = SYSTEM_USER
+  ) {
     const existing = await subscriptionRepository.findByToolAndVendor(
       data.toolName!,
-      data.vendor!
+      data.vendor!,
+      String(data.organizationId)
     );
     if (existing) {
       throw new AppError(409, `Subscription for "${data.toolName}" by "${data.vendor}" already exists`);
     }
-    const subscription = await subscriptionRepository.create(data);
+    const subscription = await subscriptionRepository.create(data as Partial<ISubscription>);
     await auditService.log(String(subscription._id), 'created', changedBy, {
       after: subscription.toObject() as unknown as Record<string, unknown>,
     });
     return subscription;
   },
 
-  async getSubscriptions(filters: SubscriptionFilters = {}, page = 1, limit = 10) {
-    return subscriptionRepository.findAll(filters, page, limit);
+  async getSubscriptions(organizationId: string, filters: SubscriptionFilters = {}, page = 1, limit = 10) {
+    return subscriptionRepository.findAll(organizationId, filters, page, limit);
   },
 
-  async getById(id: string) {
-    const subscription = await subscriptionRepository.findById(id);
+  async getById(id: string, organizationId: string) {
+    const subscription = await subscriptionRepository.findById(id, organizationId);
     if (!subscription) throw new AppError(404, 'Subscription not found');
     return subscription;
   },
 
-  async updateSubscription(id: string, data: Partial<ISubscription>, changedBy: ChangedBy = SYSTEM_USER) {
-    const before = await subscriptionRepository.findById(id);
+  async updateSubscription(
+    id: string,
+    organizationId: string,
+    data: Partial<ISubscription>,
+    changedBy: ChangedBy = SYSTEM_USER
+  ) {
+    const before = await subscriptionRepository.findById(id, organizationId);
     if (!before) throw new AppError(404, 'Subscription not found');
 
     const action =
@@ -54,7 +67,7 @@ export const subscriptionService = {
           ? 'ownership_changed'
           : 'updated';
 
-    const updated = await subscriptionRepository.update(id, data);
+    const updated = await subscriptionRepository.update(id, organizationId, data);
     await auditService.log(id, action, changedBy, {
       before: before as unknown as Record<string, unknown>,
       after: updated as unknown as Record<string, unknown>,
@@ -62,11 +75,11 @@ export const subscriptionService = {
     return updated;
   },
 
-  async deleteSubscription(id: string, changedBy: ChangedBy = SYSTEM_USER) {
-    const existing = await subscriptionRepository.findById(id);
+  async deleteSubscription(id: string, organizationId: string, changedBy: ChangedBy = SYSTEM_USER) {
+    const existing = await subscriptionRepository.findById(id, organizationId);
     if (!existing) throw new AppError(404, 'Subscription not found');
 
-    const deleted = await subscriptionRepository.softDelete(id);
+    const deleted = await subscriptionRepository.softDelete(id, organizationId);
     await auditService.log(id, 'deleted', changedBy, {
       before: existing as unknown as Record<string, unknown>,
     });

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Plus } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
@@ -37,7 +37,7 @@ export default function NewSubscriptionPage() {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<SubscriptionFormData>({
-    resolver: zodResolver(subscriptionSchema),
+    resolver: zodResolver(subscriptionSchema) as Resolver<SubscriptionFormData>,
     defaultValues: {
       status: 'active',
       departments: [],
@@ -180,7 +180,7 @@ export default function NewSubscriptionPage() {
           <div className="flex flex-wrap gap-2">
             {deptFields.map((field, i) => (
               <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
-                {watch(`departments.${i}` as never)}
+                {String(watch(`departments.${i}` as never) ?? '')}
                 <button type="button" onClick={() => removeDept(i)} className="hover:text-red-600"><X size={12} /></button>
               </span>
             ))}
@@ -210,7 +210,7 @@ export default function NewSubscriptionPage() {
           <div className="flex flex-wrap gap-2">
             {teamFields.map((field, i) => (
               <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 text-purple-700 text-xs rounded-full">
-                {watch(`teams.${i}` as never)}
+                {String(watch(`teams.${i}` as never) ?? '')}
                 <button type="button" onClick={() => removeTeam(i)} className="hover:text-red-600"><X size={12} /></button>
               </span>
             ))}
@@ -245,7 +245,7 @@ export default function NewSubscriptionPage() {
           <div className="flex flex-wrap gap-2">
             {reminderFields.map((field, i) => (
               <span key={field.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                {watch(`renewalReminderDays.${i}` as never)} days
+                {String(watch(`renewalReminderDays.${i}` as never) ?? '')} days
                 <button type="button" onClick={() => removeReminder(i)} className="hover:text-red-600"><X size={12} /></button>
               </span>
             ))}

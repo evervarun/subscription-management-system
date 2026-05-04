@@ -26,6 +26,8 @@ const STATUS_COLORS: Record<SubscriptionStatus, string> = {
   expired: '#dc2626',
   cancelled: '#6b7280',
   pending: '#d97706',
+  trial: '#2563eb',
+  paused: '#ea580c',
 };
 
 export default function DashboardPage() {
@@ -139,12 +141,12 @@ export default function DashboardPage() {
           ) : (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                <Pie data={pieData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={(props) => `${props.name} ${(((props.percent as number) ?? 0) * 100).toFixed(0)}%`}>
                   {pieData.map((entry) => (
                     <Cell key={entry.name} fill={STATUS_COLORS[entry.status]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(val: number) => [val, 'Count']} />
+                <Tooltip formatter={(val) => [val, 'Count']} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>

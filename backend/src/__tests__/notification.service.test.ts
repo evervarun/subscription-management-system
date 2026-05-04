@@ -1,6 +1,8 @@
+import mongoose from 'mongoose';
 import { notificationService } from '../services/notification.service';
 import { subscriptionService } from '../services/subscription.service';
 
+const orgId = new mongoose.Types.ObjectId().toHexString();
 const changedBy = { name: 'System', email: 'system@app.com' };
 
 const makeSubscription = (daysFromNow: number, reminderDays: number[], overrides: Record<string, unknown> = {}) => ({
@@ -12,12 +14,12 @@ const makeSubscription = (daysFromNow: number, reminderDays: number[], overrides
   departments: ['Engineering'],
   teams: [],
   renewalReminderDays: reminderDays,
+  organizationId: orgId,
   ...overrides,
 });
 
 describe('notificationService.checkRenewals', () => {
   it('returns 0 alerts when no subscriptions match reminder days', async () => {
-    // Subscription expiring in 100 days, reminder at 7 — no match
     await subscriptionService.createSubscription(makeSubscription(100, [7]), changedBy);
     const count = await notificationService.checkRenewals();
     expect(count).toBe(0);
@@ -34,7 +36,7 @@ describe('notificationService.checkRenewals', () => {
 
   it('returns 0 for soft-deleted subscriptions', async () => {
     const sub = await subscriptionService.createSubscription(makeSubscription(7, [7]), changedBy);
-    await subscriptionService.deleteSubscription(String(sub._id), changedBy);
+    await subscriptionService.deleteSubscription(String(sub._id), orgId, changedBy);
     const count = await notificationService.checkRenewals();
     expect(count).toBe(0);
   });

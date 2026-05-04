@@ -1,3 +1,4 @@
+import { Subscription } from '../models/subscription.model';
 import { subscriptionRepository } from '../repositories/subscription.repository';
 import { auditService } from './audit.service';
 import { logger } from '../lib/logger';
@@ -11,7 +12,7 @@ export const statusService = {
     }
 
     for (const sub of expired) {
-      await subscriptionRepository.update(String(sub._id), { status: 'expired' } as never);
+      await Subscription.findByIdAndUpdate(sub._id, { $set: { status: 'expired' } });
       await auditService.log(String(sub._id), 'status_changed', undefined, {
         before: { status: 'active' },
         after: { status: 'expired' },

@@ -4,7 +4,11 @@ import { subscriptionService } from '../services/subscription.service';
 export const subscriptionController = {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const subscription = await subscriptionService.createSubscription(req.body);
+      const changedBy = { name: req.user!.name, email: req.user!.email, userId: req.user!.userId };
+      const subscription = await subscriptionService.createSubscription(
+        { ...req.body, organizationId: req.user!.organizationId },
+        changedBy
+      );
       res.status(201).json({ success: true, data: subscription, message: 'Subscription created' });
     } catch (err) {
       next(err);
@@ -15,6 +19,7 @@ export const subscriptionController = {
     try {
       const { status, department, page = '1', limit = '10' } = req.query as Record<string, string>;
       const result = await subscriptionService.getSubscriptions(
+        req.user!.organizationId,
         { status, department },
         parseInt(page),
         parseInt(limit)
@@ -27,7 +32,7 @@ export const subscriptionController = {
 
   async getOne(req: Request, res: Response, next: NextFunction) {
     try {
-      const subscription = await subscriptionService.getById(req.params.id as string);
+      const subscription = await subscriptionService.getById(req.params.id as string, req.user!.organizationId);
       res.json({ success: true, data: subscription, message: 'OK' });
     } catch (err) {
       next(err);
@@ -36,7 +41,13 @@ export const subscriptionController = {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const subscription = await subscriptionService.updateSubscription(req.params.id as string, req.body);
+      const changedBy = { name: req.user!.name, email: req.user!.email, userId: req.user!.userId };
+      const subscription = await subscriptionService.updateSubscription(
+        req.params.id as string,
+        req.user!.organizationId,
+        req.body,
+        changedBy
+      );
       res.json({ success: true, data: subscription, message: 'Subscription updated' });
     } catch (err) {
       next(err);
@@ -45,7 +56,12 @@ export const subscriptionController = {
 
   async remove(req: Request, res: Response, next: NextFunction) {
     try {
-      await subscriptionService.deleteSubscription(req.params.id as string);
+      const changedBy = { name: req.user!.name, email: req.user!.email, userId: req.user!.userId };
+      await subscriptionService.deleteSubscription(
+        req.params.id as string,
+        req.user!.organizationId,
+        changedBy
+      );
       res.json({ success: true, data: null, message: 'Subscription deleted' });
     } catch (err) {
       next(err);

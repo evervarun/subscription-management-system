@@ -1,8 +1,7 @@
-import mongoose from 'mongoose';
 import { Subscription, ISubscription } from '../models/subscription.model';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FilterQuery<T> = Record<string, any>;
+type FilterQuery = Record<string, any>;
 
 export interface SubscriptionFilters {
   status?: string;
@@ -10,8 +9,8 @@ export interface SubscriptionFilters {
 }
 
 export const subscriptionRepository = {
-  async findAll(filters: SubscriptionFilters = {}, page = 1, limit = 10) {
-    const query: FilterQuery<ISubscription> = { isDeleted: false };
+  async findAll(organizationId: string, filters: SubscriptionFilters = {}, page = 1, limit = 10) {
+    const query: FilterQuery = { isDeleted: false, organizationId };
     if (filters.status) query.status = filters.status;
     if (filters.department) query.departments = filters.department;
 
@@ -23,34 +22,35 @@ export const subscriptionRepository = {
     return { data, total };
   },
 
-  async findById(id: string) {
-    return Subscription.findOne({ _id: id, isDeleted: false }).lean();
+  async findById(id: string, organizationId: string) {
+    return Subscription.findOne({ _id: id, isDeleted: false, organizationId }).lean();
   },
 
-  async findByToolAndVendor(toolName: string, vendor: string) {
-    return Subscription.findOne({ toolName, vendor, isDeleted: false }).lean();
+  async findByToolAndVendor(toolName: string, vendor: string, organizationId: string) {
+    return Subscription.findOne({ toolName, vendor, organizationId, isDeleted: false }).lean();
   },
 
   async create(data: Partial<ISubscription>) {
     return Subscription.create(data);
   },
 
-  async update(id: string, data: Partial<ISubscription>) {
-    return Subscription.findByIdAndUpdate(
-      id,
+  async update(id: string, organizationId: string, data: Partial<ISubscription>) {
+    return Subscription.findOneAndUpdate(
+      { _id: id, organizationId },
       { $set: data },
       { new: true, runValidators: true }
     ).lean();
   },
 
-  async softDelete(id: string) {
-    return Subscription.findByIdAndUpdate(
-      id,
+  async softDelete(id: string, organizationId: string) {
+    return Subscription.findOneAndUpdate(
+      { _id: id, organizationId },
       { $set: { isDeleted: true } },
       { new: true }
     ).lean();
   },
 
+  // Global (cron) — no org filter intentional
   async findExpiredActive() {
     return Subscription.find({
       isDeleted: false,

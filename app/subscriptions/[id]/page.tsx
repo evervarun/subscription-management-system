@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Pencil, Trash2, Clock } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
@@ -58,7 +58,10 @@ export default function SubscriptionDetailPage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<SubscriptionFormData>({ resolver: zodResolver(subscriptionSchema) });
+  } = useForm<SubscriptionFormData>({
+    resolver: zodResolver(subscriptionSchema) as Resolver<SubscriptionFormData>,
+    defaultValues: { status: 'active', departments: [], teams: [], renewalReminderDays: [30, 7, 1] },
+  });
 
   const fetchData = useCallback(async () => {
     try {

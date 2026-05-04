@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/layout/Sidebar";
+import { AuthProvider } from "@/lib/auth-context";
+import AppShell from "@/components/layout/AppShell";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -21,9 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${montserrat.variable} h-full antialiased`} data-theme="light">
-      <body className="h-full flex bg-gray-50 font-[var(--font-montserrat)]">
-        <Sidebar />
-        <main className="flex-1 overflow-auto p-8">{children}</main>
+      <body className="h-full font-(--font-montserrat)">
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   );

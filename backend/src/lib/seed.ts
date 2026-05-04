@@ -1,208 +1,66 @@
-import 'dotenv/config';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
 import { connectDB } from './db';
+import { Organization } from '../models/org.model';
+import { User } from '../models/user.model';
 import { Subscription } from '../models/subscription.model';
-import { AuditLog } from '../models/audit.model';
-import { logger } from './logger';
+import { Audit } from '../models/audit.model';
 
-const now = Date.now();
-const days = (n: number) => new Date(now + n * 86400000);
-const system = { name: 'System', email: 'system@nebulaworks.com' };
-
-const seedData = [
-  {
-    toolName: 'Jira',
-    vendor: 'Atlassian',
-    plan: 'Standard',
-    startDate: days(-365),
-    expiryDate: days(25),
-    paymentCycle: 'annual',
-    status: 'active',
-    licenses: 80,
-    departments: ['Engineering', 'QA', 'Product'],
-    teams: ['Backend', 'Frontend', 'QA'],
-    owner: { name: 'Ravi Shankar', email: 'ravi.shankar@nebulaworks.com', userId: 'usr_001' },
-    renewalReminderDays: [60, 30, 7, 1],
-  },
-  {
-    toolName: 'Darwin Box',
-    vendor: 'DarwinBox',
-    plan: 'Enterprise',
-    startDate: days(-180),
-    expiryDate: days(180),
-    paymentCycle: 'annual',
-    status: 'active',
-    licenses: 200,
-    departments: ['HR', 'Finance', 'Operations'],
-    teams: ['All Teams'],
-    owner: { name: 'Priya Mehta', email: 'priya.mehta@nebulaworks.com', userId: 'usr_002' },
-    renewalReminderDays: [90, 30, 7],
-  },
-  {
-    toolName: 'Slack',
-    vendor: 'Salesforce',
-    plan: 'Pro',
-    startDate: days(-300),
-    expiryDate: days(7),
-    paymentCycle: 'annual',
-    status: 'active',
-    licenses: 150,
-    departments: ['Engineering', 'HR', 'Product', 'Sales'],
-    teams: ['All Teams'],
-    owner: { name: 'Arun Kumar', email: 'arun.kumar@nebulaworks.com', userId: 'usr_003' },
-    renewalReminderDays: [30, 7, 1],
-  },
-  {
-    toolName: 'GitHub',
-    vendor: 'Microsoft',
-    plan: 'Enterprise',
-    startDate: days(-200),
-    expiryDate: days(90),
-    paymentCycle: 'annual',
-    status: 'active',
-    licenses: 100,
-    departments: ['Engineering', 'DevOps'],
-    teams: ['Backend', 'Frontend', 'DevOps', 'SRE'],
-    owner: { name: 'Deepak Nair', email: 'deepak.nair@nebulaworks.com', userId: 'usr_004' },
-    renewalReminderDays: [60, 30, 7],
-  },
-  {
-    toolName: 'Figma',
-    vendor: 'Figma Inc.',
-    plan: 'Organization',
-    startDate: days(-120),
-    expiryDate: days(240),
-    paymentCycle: 'annual',
-    status: 'active',
-    licenses: 20,
-    departments: ['Design', 'Product'],
-    teams: ['Design', 'Product'],
-    owner: { name: 'Sneha Patil', email: 'sneha.patil@nebulaworks.com', userId: 'usr_005' },
-    renewalReminderDays: [30, 7],
-  },
-  {
-    toolName: 'Zoom',
-    vendor: 'Zoom Video Communications',
-    plan: 'Business Plus',
-    startDate: days(-400),
-    expiryDate: days(-10),
-    paymentCycle: 'annual',
-    status: 'expired',
-    licenses: 50,
-    departments: ['HR', 'Sales', 'Operations'],
-    teams: ['Sales', 'HR'],
-    owner: { name: 'Kavitha Rao', email: 'kavitha.rao@nebulaworks.com', userId: 'usr_006' },
-    renewalReminderDays: [30, 7, 1],
-  },
-  {
-    toolName: 'Notion',
-    vendor: 'Notion Labs',
-    plan: 'Team',
-    startDate: days(-60),
-    expiryDate: days(300),
-    paymentCycle: 'monthly',
-    status: 'trial',
-    licenses: 30,
-    departments: ['Product', 'HR', 'Operations'],
-    teams: ['Product', 'Operations'],
-    owner: { name: 'Suresh Iyer', email: 'suresh.iyer@nebulaworks.com', userId: 'usr_007' },
-    renewalReminderDays: [30, 7],
-  },
-  {
-    toolName: 'AWS',
-    vendor: 'Amazon Web Services',
-    plan: 'Business Support',
-    startDate: days(-500),
-    expiryDate: days(60),
-    paymentCycle: 'monthly',
-    status: 'active',
-    licenses: 10,
-    departments: ['Engineering', 'DevOps'],
-    teams: ['DevOps', 'SRE'],
-    owner: { name: 'Deepak Nair', email: 'deepak.nair@nebulaworks.com', userId: 'usr_004' },
-    renewalReminderDays: [30, 14, 7],
-  },
-  {
-    toolName: 'Confluence',
-    vendor: 'Atlassian',
-    plan: 'Standard',
-    startDate: days(-365),
-    expiryDate: days(25),
-    paymentCycle: 'annual',
-    status: 'active',
-    licenses: 80,
-    departments: ['Engineering', 'Product', 'HR'],
-    teams: ['Backend', 'Frontend', 'Product'],
-    owner: { name: 'Ravi Shankar', email: 'ravi.shankar@nebulaworks.com', userId: 'usr_001' },
-    renewalReminderDays: [30, 7, 1],
-  },
-  {
-    toolName: 'HubSpot CRM',
-    vendor: 'HubSpot',
-    plan: 'Professional',
-    startDate: days(-90),
-    expiryDate: days(-3),
-    paymentCycle: 'monthly',
-    status: 'expired',
-    licenses: 15,
-    departments: ['Sales', 'Marketing'],
-    teams: ['Sales', 'Marketing'],
-    owner: { name: 'Meena Srinivasan', email: 'meena.srinivasan@nebulaworks.com', userId: 'usr_008' },
-    renewalReminderDays: [30, 7],
-  },
-  {
-    toolName: 'Postman',
-    vendor: 'Postman Inc.',
-    plan: 'Team',
-    startDate: days(-150),
-    expiryDate: days(120),
-    paymentCycle: 'annual',
-    status: 'active',
-    licenses: 25,
-    departments: ['Engineering', 'QA'],
-    teams: ['Backend', 'QA'],
-    owner: { name: 'Arjun Reddy', email: 'arjun.reddy@nebulaworks.com', userId: 'usr_009' },
-    renewalReminderDays: [30, 7],
-  },
-  {
-    toolName: 'Datadog',
-    vendor: 'Datadog Inc.',
-    plan: 'Pro',
-    startDate: days(-200),
-    expiryDate: days(160),
-    paymentCycle: 'annual',
-    status: 'paused',
-    licenses: 5,
-    departments: ['DevOps', 'Engineering'],
-    teams: ['SRE', 'DevOps'],
-    owner: { name: 'Deepak Nair', email: 'deepak.nair@nebulaworks.com', userId: 'usr_004' },
-    renewalReminderDays: [30, 14],
-  },
-];
+dotenv.config();
 
 async function seed() {
   await connectDB();
 
-  // Clear existing data
-  await Subscription.deleteMany({});
-  await AuditLog.deleteMany({});
-  logger.info('[Seed] Cleared existing subscriptions and audit logs');
+  console.log('Clearing existing data...');
+  await Promise.all([
+    Subscription.deleteMany({}),
+    Audit.deleteMany({}),
+    User.deleteMany({}),
+    Organization.deleteMany({}),
+  ]);
 
-  for (const data of seedData) {
-    const sub = await Subscription.create(data);
-    await AuditLog.create({
-      subscriptionId: sub._id,
-      action: 'created',
-      changedBy: system,
-      changes: { after: sub.toObject() },
-    });
-    logger.info(`[Seed] Created: ${data.toolName} (${data.vendor}) — ${data.status}`);
-  }
+  console.log('Creating organization...');
+  const org = await Organization.create({
+    name: 'NebulaWorks Technologies',
+    planType: 'professional',
+  });
 
-  logger.info(`[Seed] Done — ${seedData.length} subscriptions seeded for NebulaWorks Technologies`);
+  console.log('Creating demo users...');
+  const passwordHash = await bcrypt.hash('password123', 10);
+  await User.insertMany([
+    { name: 'Admin User', email: 'admin@nebulaworks.com', passwordHash, role: 'admin', organizationId: org._id, status: 'active' },
+    { name: 'Member User', email: 'member@nebulaworks.com', passwordHash, role: 'member', organizationId: org._id, status: 'active' },
+  ]);
+
+  console.log('Seeding subscriptions...');
+  const today = new Date();
+  const d = (days: number) => { const dt = new Date(today); dt.setDate(dt.getDate() + days); return dt; };
+
+  const subscriptions = [
+    { toolName: 'GitHub', vendor: 'GitHub Inc.', status: 'active', cost: 21, currency: 'USD', startDate: d(-365), expiryDate: d(60), paymentCycle: 'monthly', departments: ['Engineering'], owner: { name: 'Alice Chen', email: 'alice@nebulaworks.com' }, renewalReminderDays: 30 },
+    { toolName: 'Slack', vendor: 'Salesforce', status: 'active', cost: 12.50, currency: 'USD', startDate: d(-180), expiryDate: d(14), paymentCycle: 'monthly', departments: ['Engineering', 'Product'], owner: { name: 'Bob Smith', email: 'bob@nebulaworks.com' }, renewalReminderDays: 30 },
+    { toolName: 'Figma', vendor: 'Figma Inc.', status: 'active', cost: 45, currency: 'USD', startDate: d(-90), expiryDate: d(275), paymentCycle: 'annual', departments: ['Design'], owner: { name: 'Carol Zhang', email: 'carol@nebulaworks.com' }, renewalReminderDays: 60 },
+    { toolName: 'AWS', vendor: 'Amazon', status: 'active', cost: 3200, currency: 'USD', startDate: d(-730), expiryDate: d(365), paymentCycle: 'monthly', departments: ['Engineering', 'DevOps'], owner: { name: 'Dave Patel', email: 'dave@nebulaworks.com' }, renewalReminderDays: 30 },
+    { toolName: 'Jira', vendor: 'Atlassian', status: 'active', cost: 8.15, currency: 'USD', startDate: d(-200), expiryDate: d(7), paymentCycle: 'monthly', departments: ['Product', 'Engineering'], owner: { name: 'Eve Johnson', email: 'eve@nebulaworks.com' }, renewalReminderDays: 14 },
+    { toolName: 'Notion', vendor: 'Notion Labs', status: 'trial', cost: 0, currency: 'USD', startDate: d(-15), expiryDate: d(15), paymentCycle: 'monthly', departments: ['All'], owner: { name: 'Frank Lee', email: 'frank@nebulaworks.com' }, renewalReminderDays: 7 },
+    { toolName: 'Salesforce', vendor: 'Salesforce', status: 'paused', cost: 150, currency: 'USD', startDate: d(-365), expiryDate: d(180), paymentCycle: 'annual', departments: ['Sales'], owner: { name: 'Grace Kim', email: 'grace@nebulaworks.com' }, renewalReminderDays: 30 },
+    { toolName: 'Datadog', vendor: 'Datadog Inc.', status: 'expired', cost: 234, currency: 'USD', startDate: d(-400), expiryDate: d(-30), paymentCycle: 'monthly', departments: ['DevOps'], owner: { name: 'Hank Brown', email: 'hank@nebulaworks.com' }, renewalReminderDays: 14 },
+    { toolName: 'Zoom', vendor: 'Zoom Video Comms', status: 'cancelled', cost: 14.99, currency: 'USD', startDate: d(-500), expiryDate: d(-90), paymentCycle: 'monthly', departments: ['All'], owner: { name: 'Iris White', email: 'iris@nebulaworks.com' }, renewalReminderDays: 30 },
+    { toolName: 'Linear', vendor: 'Linear Inc.', status: 'pending', cost: 8, currency: 'USD', startDate: d(5), expiryDate: d(370), paymentCycle: 'annual', departments: ['Engineering', 'Product'], owner: { name: 'Jack Martinez', email: 'jack@nebulaworks.com' }, renewalReminderDays: 30 },
+    { toolName: 'Vercel', vendor: 'Vercel Inc.', status: 'active', cost: 20, currency: 'USD', startDate: d(-60), expiryDate: d(305), paymentCycle: 'monthly', departments: ['Engineering'], owner: { name: 'Karen Liu', email: 'karen@nebulaworks.com' }, renewalReminderDays: 14 },
+    { toolName: 'Loom', vendor: 'Loom Inc.', status: 'active', cost: 12.50, currency: 'USD', startDate: d(-120), expiryDate: d(245), paymentCycle: 'monthly', departments: ['Product', 'Design'], owner: { name: 'Leo Wang', email: 'leo@nebulaworks.com' }, renewalReminderDays: 30 },
+  ].map(s => ({ ...s, organizationId: org._id, isDeleted: false }));
+
+  await Subscription.insertMany(subscriptions);
+  console.log(`✓ Seeded ${subscriptions.length} subscriptions`);
+  console.log('');
+  console.log('Demo credentials:');
+  console.log('  Admin:  admin@nebulaworks.com  / password123');
+  console.log('  Member: member@nebulaworks.com / password123');
+
+  await mongoose.disconnect();
   process.exit(0);
 }
 
-seed().catch((err) => {
-  logger.error('[Seed] Failed:', err);
-  process.exit(1);
-});
+seed().catch(err => { console.error(err); process.exit(1); });
